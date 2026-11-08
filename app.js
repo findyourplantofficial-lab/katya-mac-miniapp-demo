@@ -4,8 +4,7 @@
 'use strict';
 
 (function () {
-  const APP_VERSION = '2.0.0';
-  const BOT = 'katya_dushevno_mac_demo_bot';
+  const APP_VERSION = '2.0.1';
   const ROOT = document.getElementById('app');
   const BACK = document.getElementById('top-back');
   const RAIL = document.getElementById('progress-rail');
@@ -138,8 +137,7 @@
     if(state.screen==='question') progress=27 + 52*(state.index+1)/state.steps.length;
     if(state.screen==='view-card') progress=27 + 52*(state.index+1)/state.steps.length;
     if(state.screen==='depth') progress=78;
-    if(state.screen==='result') progress=92;
-    if(state.screen==='offer') progress=100;
+    if(state.screen==='result') progress=100;
     BAR.style.width=progress+'%';
     try {
       if (tg && tg.BackButton) show ? tg.BackButton.show() : tg.BackButton.hide();
@@ -175,7 +173,6 @@
       case 'view-card': renderCardPreview();break;
       case 'depth': renderDepth();break;
       case 'result': renderResult();break;
-      case 'offer': renderOffer();break;
       default: renderIntro();
     }
   }
@@ -277,30 +274,14 @@
       '<p class="lead" style="margin:0 0 18px">Одна фраза, которая будет напоминать тебе о самом важном. Напиши свою — или оставь начало мысли.</p>'+
       '<div class="personal-card"><img src="'+chosen().wallpaper+'" alt="Карта для телефона">'+
       '<div class="overlay"><small>МОЯ ОПОРА</small><strong id="live-phrase">'+esc(label)+'</strong></div></div>'+
+      '<p class="result-gift-label">Твоя карта для экрана телефона · Катя о душевном</p>'+
       '<div class="result-input"><label for="personal-phrase">Моя фраза на сегодня</label>'+
       '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я могу опереться на…">'+esc(state.phrase)+'</textarea>'+
       '<small>Только ты видишь эту фразу. Она не отправляется ни Кате, ни боту.</small></div>'+
       '<div class="action-stack">'+act('Сохранить открытку','download','primary','download')+
       act('Поделиться / открыть изображение','share','secondary','spark')+
-      '<button type="button" class="text-button" data-action="offer">Посмотреть, что дальше →</button></div>'+
+      '<p class="result-signoff">С теплом, Катя о душевном 🌿</p></div>'+
       '</div>');
-  }
-
-  function renderOffer() {
-    setHtml('<div class="offer-scene scene">'+
-      '<p class="eyebrow"><span class="dash"></span>ЕСЛИ ЗАХОЧЕТСЯ ПРОДОЛЖЕНИЯ</p>'+
-      '<h2>Встретиться <em>по-настоящему.</em></h2>'+
-      '<p class="lead">Катя готовит небольшие живые встречи с метафорическими картами. В группе можно увидеть другие образы, услышать себя и поработать с вопросами глубже — бережно и без оценок.</p>'+
-      '<div class="detail"><ul>'+
-      '<li>'+icon('pin')+' Москва · пространство уточняется</li>'+
-      '<li>'+icon('users')+' Небольшая группа, 4–6 участниц</li>'+
-      '<li>'+icon('clock')+' Примерно 1,5–3 часа</li>'+
-      '<li>'+icon('heart')+' Ориентир стоимости — 1 500 ₽</li>'+
-      '</ul></div>'+
-      '<p class="fineprint">Дату и место ещё не подтвердили. Это тестовая версия: реальная запись и оплата пока не открыты. МАК — инструмент саморефлексии, а не диагностика и не замена профессиональной психологической помощи.</p>'+
-      '<div class="action-stack">'+act('Узнать о будущих встречах','meeting','primary','arrow')+
-      act('Вернуться к моей открытке','back','secondary')+'</div>'+
-      '<p class="quiet-note">Никакой оплаты, подписки или обязательства.</p></div>');
   }
 
   async function generateCard() {
@@ -404,14 +385,6 @@
     }
   }
 
-  function openBot() {
-    const url='https://t.me/'+BOT+'?start=miniapp_interest';
-    try {
-      if(tg && typeof tg.openTelegramLink==='function'){tg.openTelegramLink(url);return;}
-    } catch(e){console.warn('Telegram open failed',e);}
-    window.open(url,'_blank','noopener,noreferrer');
-  }
-
   function handle(action,value) {
     haptic();
     if(action==='start'){go('intention');return}
@@ -445,8 +418,6 @@
     if(action==='finish'){go('result');return}
     if(action==='download'){downloadCard();return}
     if(action==='share'){shareCard();return}
-    if(action==='offer'){go('offer');return}
-    if(action==='meeting'){openBot();return}
   }
 
   function updatePhrase(el) {
