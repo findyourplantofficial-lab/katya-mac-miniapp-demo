@@ -1,0 +1,7 @@
+qa_*.png
+qa_local.cjs
+.env
+.env.*
+*.log
+node_modules/
+.DS_Store
