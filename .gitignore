@@ -5,3 +5,10 @@ qa_local.cjs
 *.log
 node_modules/
 .DS_Store
+botfather_*.py
+botfather_*.json
+botfather_cover_*.jpg
+build_botfather_cover.py
+verify_botapp.py
+qa_telegram_integration.py
+

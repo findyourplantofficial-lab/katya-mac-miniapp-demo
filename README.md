@@ -1,5 +1,10 @@
 # Катя о душевном — Mini App v2 (демо)
 
+**Прямой запуск внутри Telegram:** https://t.me/katya_dushevno_mac_demo_bot/opora  
+**Обычный бот с резервным сценарием:** https://t.me/katya_dushevno_mac_demo_bot  
+**Публичный HTTPS-адрес:** https://findyourplantofficial-lab.github.io/katya-mac-miniapp-demo/
+
+
 Интерактивная короткая практика с МАК-картами. Отдельный статический сайт, который можно открыть внутри Telegram через кнопку бота. Код интерфейса не требует сервера и не использует токен бота.
 
 ## Что работает
