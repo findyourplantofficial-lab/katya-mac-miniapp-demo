@@ -4,7 +4,7 @@
 'use strict';
 
 (function () {
-  const APP_VERSION = '2.0.1';
+  const APP_VERSION = '2.0.2';
   const ROOT = document.getElementById('app');
   const BACK = document.getElementById('top-back');
   const RAIL = document.getElementById('progress-rail');
@@ -88,6 +88,8 @@
     imageUrl: null
   };
   let toastTimer = null;
+  let cardRevision = 0;
+  let cardRenderTimer = null;
 
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
@@ -123,8 +125,19 @@
   }
 
   function invalidateImage() {
+    cardRevision++;
+    clearTimeout(cardRenderTimer);
     if (state.imageUrl) { URL.revokeObjectURL(state.imageUrl); state.imageUrl=null; }
     state.imageBlob=null;
+  }
+
+  function scheduleCardRender() {
+    clearTimeout(cardRenderTimer);
+    cardRenderTimer=setTimeout(() => {
+      if(state.screen==='result' && !state.imageBlob){
+        generateCard().catch(error => console.warn('Preview card generation failed', error));
+      }
+    },180);
   }
 
   function updateNavigation() {
@@ -152,6 +165,7 @@
   }
 
   function back() {
+    if(document.getElementById('save-image-overlay')){closeSavePreview();return;}
     if(!state.history.length)return;
     const last=state.history.pop();
     state.screen=last.screen;
@@ -278,15 +292,19 @@
       '<div class="result-input"><label for="personal-phrase">Моя фраза на сегодня</label>'+
       '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я могу опереться на…">'+esc(state.phrase)+'</textarea>'+
       '<small>Только ты видишь эту фразу. Она не отправляется ни Кате, ни боту.</small></div>'+
-      '<div class="action-stack">'+act('Сохранить открытку','download','primary','download')+
-      act('Поделиться / открыть изображение','share','secondary','spark')+
+      '<div class="action-stack">'+act('Сохранить в «Фото»','download','primary','download')+
+      act('Посмотреть открытку крупно','preview-image','secondary','eye')+
+      '<p class="save-explanation">На iPhone выбери «Сохранить изображение» в меню «Поделиться».</p>'+
       '<p class="result-signoff">С теплом, Катя о душевном 🌿</p></div>'+
       '</div>');
+    scheduleCardRender();
   }
 
   async function generateCard() {
     if (state.imageBlob) return state.imageBlob;
+    const revision=cardRevision;
     const asset=chosen().wallpaper;
+    const phrase=(state.phrase.trim()||'Сегодня я могу опереться на…').slice(0,110);
     const image=new Image();
     image.decoding='async';
     image.src=asset;
@@ -297,7 +315,7 @@
     const ctx=canvas.getContext('2d');
     if(!ctx) throw new Error('Canvas is not supported');
     ctx.drawImage(image,0,0,canvas.width,canvas.height);
-    const txt=(state.phrase.trim()||'Сегодня я могу опереться на…').slice(0,110);
+    const txt=phrase;
     const maxWidth=840;
     const lines=wrapText(ctx,txt,maxWidth);
     const y=1260,h=410;
@@ -312,6 +330,8 @@
     ctx.font='500 64px Georgia, serif';
     lines.forEach((line,i)=>ctx.fillText(line,540,y+188+(i-(lines.length-1)/2)*87));
     const blob=await new Promise((res,rej)=>canvas.toBlob(x=>x?res(x):rej(new Error('Canvas export failed')),'image/jpeg',.94));
+    if(revision!==cardRevision)return generateCard(); // The phrase changed during canvas export.
+    if(state.imageBlob)return state.imageBlob;
     state.imageBlob=blob;
     state.imageUrl=URL.createObjectURL(blob);
     return blob;
@@ -354,35 +374,129 @@
     ctx.closePath();
   }
 
-  async function downloadCard() {
+  // The image and personal phrase stay inside the device's WebView.
+  // iOS Photo Library writes require a system/user action; there is no silent save.
+  const iosClient=() => /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const mobileClient=() => iosClient() || /Android/i.test(navigator.userAgent);
+
+  function browserDownload() {
+    if(!state.imageUrl)return;
+    const a=document.createElement('a');
+    a.href=state.imageUrl;
+    a.download='moya-opora-katya.jpg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('Файл подготовлен. Проверь папку «Загрузки».');
+  }
+
+  function closeSavePreview() {
+    const existing=document.getElementById('save-image-overlay');
+    if(existing)existing.remove();
+    const btn=ROOT.querySelector('[data-action="download"]');
+    if(btn)btn.focus({preventScroll:true});
+  }
+
+  function showSavePreview() {
+    if(!state.imageUrl) {
+      showToast('Не удалось открыть открытку. Попробуй ещё раз.');
+      return;
+    }
+    if(document.getElementById('save-image-overlay'))return;
+    const overlay=document.createElement('div');
+    overlay.id='save-image-overlay';
+    overlay.className='save-image-overlay';
+    overlay.innerHTML=
+      '<section class="save-image-dialog" role="dialog" aria-modal="true" aria-labelledby="save-image-title">'+
+      '<button type="button" class="save-image-close" data-save-action="close" aria-label="Закрыть">×</button>'+
+      '<p class="eyebrow">ТВОЯ ГОТОВАЯ КАРТА</p>'+
+      '<h2 id="save-image-title">Сохрани её <em>в «Фото».</em></h2>'+
+      '<p class="save-image-guide">Нажми и удерживай изображение → «Сохранить изображение». '+
+      'Если такого пункта нет, нажми «Поделиться» и в системном меню выбери «Сохранить изображение».</p>'+
+      '<img class="save-image-photo" src="'+state.imageUrl+'" draggable="false" alt="Твоя готовая персональная карта, которую можно сохранить в Фото">'+
+      '<div class="save-image-actions">'+
+      '<button type="button" class="primary" data-save-action="system">Поделиться с телефоном</button>'+
+      '<button type="button" class="secondary" data-save-action="file">Скачать JPG-файл</button>'+
+      '<button type="button" class="text-button" data-save-action="close">Вернуться к практике</button>'+
+      '</div><p class="save-image-note">Карта создаётся только на твоём устройстве. '+
+      'Твоя личная фраза никуда не отправляется.</p></section>';
+    overlay.addEventListener('click',event=>{
+      if(event.target===overlay){closeSavePreview();return;}
+      const btn=event.target.closest('[data-save-action]');
+      if(!btn)return;
+      const action=btn.dataset.saveAction;
+      if(action==='close')closeSavePreview();
+      else if(action==='file')browserDownload();
+      else if(action==='system'&&!nativeFileShare(state.imageBlob))
+        showToast('Системное меню недоступно. Удерживай изображение, чтобы сохранить его.');
+    });
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-save-action="close"]').focus({preventScroll:true});
+  }
+
+  // Call navigator.share directly inside the user's tap handler whenever
+  // the JPEG is already ready. WebKit may discard gesture activation after
+  // awaiting an image decode or canvas export.
+  function nativeFileShare(blob) {
+    if(!blob || typeof navigator.share!=='function' ||
+       typeof navigator.canShare!=='function')return false;
     try {
-      await generateCard();
-      const a=document.createElement('a');
-      a.href=state.imageUrl;
-      a.download='Моя-опора-Катя-о-душевном.jpg';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      showToast('Открытка готова. Если файл не сохранился, нажми «Открыть изображение».');
-    }catch(error) {
-      console.error('Image creation failed',error);
-      showToast('Не удалось создать изображение. Попробуй открыть практику в браузере.');
+      const file=new File([blob],'moya-opora-katya.jpg',{type:'image/jpeg'});
+      if(!navigator.canShare({files:[file]}))return false;
+      const operation=navigator.share({files:[file],title:'Моя опора — Катя о душевном'});
+      Promise.resolve(operation).then(
+        ()=>showToast('Если выбрала «Сохранить изображение», проверь приложение «Фото».'),
+        error=>{
+          if(error && error.name==='AbortError')return;
+          console.warn('Native file share failed',error);
+          showSavePreview();
+        }
+      );
+      return true;
+    }catch(error){
+      console.warn('Native file share unavailable',error);
+      return false;
     }
   }
 
-  async function shareCard() {
-    try {
-      const blob=await generateCard();
-      const file=new File([blob],'moya-opora.jpg',{type:'image/jpeg'});
-      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:'Моя опора — Катя о душевном'});
-      } else if(state.imageUrl){
-        const win=window.open(state.imageUrl,'_blank');
-        if(!win) showToast('Если изображение не открылось, попробуй кнопку сохранения.');
+  function downloadCard() {
+    if(state.imageBlob){
+      if(mobileClient() || (tg && tg.initData)){
+        if(!nativeFileShare(state.imageBlob))showSavePreview();
+      }else{
+        browserDownload();
       }
-    } catch(e){
-      if(e.name!=='AbortError'){console.error('Cannot share',e);showToast('Поделиться не получилось. Попробуй сохранить открытку.');}
+      return;
     }
+    // Slow first load: render locally, then show a persistent tappable
+    // preview rather than losing the user gesture in an async native share.
+    generateCard().then(()=>{
+      if(mobileClient() || (tg && tg.initData))showSavePreview();
+      else browserDownload();
+    }).catch(error=>{
+      console.error('Image creation failed',error);
+      showToast('Не удалось создать изображение. Попробуй ещё раз.');
+    });
+  }
+
+  function shareCard() {
+    if(state.imageBlob){
+      if(!nativeFileShare(state.imageBlob))showSavePreview();
+      return;
+    }
+    generateCard().then(showSavePreview).catch(error=>{
+      console.error('Image preview failed',error);
+      showToast('Не удалось открыть изображение. Попробуй ещё раз.');
+    });
+  }
+
+  function previewCard() {
+    if(state.imageBlob){showSavePreview();return;}
+    generateCard().then(showSavePreview).catch(error=>{
+      console.error('Image preview failed',error);
+      showToast('Не удалось открыть открытку. Попробуй ещё раз.');
+    });
   }
 
   function handle(action,value) {
@@ -418,6 +532,7 @@
     if(action==='finish'){go('result');return}
     if(action==='download'){downloadCard();return}
     if(action==='share'){shareCard();return}
+    if(action==='preview-image'){previewCard();return}
   }
 
   function updatePhrase(el) {
@@ -425,6 +540,7 @@
     invalidateImage();
     const text=document.getElementById('live-phrase');
     if(text)text.textContent=state.phrase.trim()||'Сегодня я могу опереться на…';
+    scheduleCardRender();
   }
 
   ROOT.addEventListener('click',event=>{
@@ -443,7 +559,13 @@
   });
 
   BACK.addEventListener('click',back);
-  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.history.length){e.preventDefault();back();}});
+  window.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      if(document.getElementById('save-image-overlay')){
+        e.preventDefault();closeSavePreview();
+      }else if(state.history.length){e.preventDefault();back();}
+    }
+  });
   if(tg) {
     try {
       tg.ready();
@@ -457,7 +579,7 @@
   window.__KATYA_DEMO__={
     version:APP_VERSION,
     state:()=>({screen:state.screen,topic:state.topic,card:state.card,steps:[...state.steps],index:state.index,
-                noteCount:Object.values(state.notes).filter(x=>x.trim()).length}),
+                noteCount:Object.values(state.notes).filter(x=>x.trim()).length,imageReady:!!state.imageBlob}),
     reset:()=>{state.screen='intro';state.history=[];state.topic=null;state.card=null;state.steps=[...initialSteps];state.index=0;state.notes={};state.phrase='';invalidateImage();render();}
   };
   render();
