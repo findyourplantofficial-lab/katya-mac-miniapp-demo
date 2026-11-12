@@ -4,13 +4,14 @@
 'use strict';
 
 (function () {
-  const APP_VERSION = '2.0.2';
+  const APP_VERSION = '2.0.3';
   const ROOT = document.getElementById('app');
   const BACK = document.getElementById('top-back');
   const RAIL = document.getElementById('progress-rail');
   const BAR = document.getElementById('progress-bar');
   const TOAST = document.getElementById('toast');
-  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  let tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  let telegramInitialized = false;
 
   const cards = [
     { id: 1, title: 'Росток среди камней', image: 'assets/card_1.jpg', wallpaper: 'assets/wallpaper_1.jpg' },
@@ -566,7 +567,12 @@
       }else if(state.history.length){e.preventDefault();back();}
     }
   });
-  if(tg) {
+  function initializeTelegram() {
+    if (telegramInitialized) return;
+    const instance = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (!instance) return;
+    tg = instance;
+    telegramInitialized = true;
     try {
       tg.ready();
       tg.expand();
@@ -575,6 +581,9 @@
       if(tg.BackButton)tg.BackButton.onClick(back);
     } catch(e){console.warn('Telegram UI not initialized',e);}
   }
+  const telegramSdkScript = document.getElementById('telegram-sdk');
+  if(telegramSdkScript) telegramSdkScript.addEventListener('load',initializeTelegram,{once:true});
+  initializeTelegram();
 
   window.__KATYA_DEMO__={
     version:APP_VERSION,
