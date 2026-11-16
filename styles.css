@@ -196,3 +196,17 @@ textarea:focus-visible {outline:none}
 .closing-bottom{margin-top:auto;padding:20px 0 8px}
 @media(max-height:710px){.closing-scene{padding-top:7px}.closing-card{width:91px;height:121px}.closing-scene .lead{line-height:1.5}.card-zoom{width:70px;height:96px}.practice-scene .journal-block{margin-top:10px}}
 @media(max-width:370px){.practice-scene h2{font-size:37px}.card-zoom{width:73px;height:101px}.card-zoom-dialog img{max-height:calc(100dvh - 140px)}}
+
+/* 2.2: calm, readable, single-path practice */
+.journal-label {font-size:12px}
+.journal-label span:last-child {font-size:11px}
+.question-bottom .text-button {min-height:44px; padding:10px 8px}
+.practice-scene .question-bottom .action-stack {gap:7px}
+.practice-scene .question-bottom .primary {min-height:55px}
+.footer {font-size:11px}
+.result-input small,.save-explanation {font-size:11px;line-height:1.55}
+@media(max-width:370px) {
+ .footer {font-size:10px}
+ .practice-scene h2 {font-size:36px}
+ .app-shell {padding-left:17px;padding-right:17px}
+}

@@ -4,7 +4,7 @@
 'use strict';
 
 (function () {
-  const APP_VERSION = '2.1.0';
+  const APP_VERSION = '2.2.0';
   const ROOT = document.getElementById('app');
   const BACK = document.getElementById('top-back');
   const RAIL = document.getElementById('progress-rail');
@@ -19,11 +19,8 @@
     { id: 3, title: 'Творческая мастерская', image: 'assets/card_3.jpg', wallpaper: 'assets/wallpaper_3.jpg' }
   ];
 
-  const topics = [
-    { id: 'much', title: 'Когда всего слишком много', hint: 'Дела, заботы и ответственность не заканчиваются.' },
-    { id: 'support', title: 'Когда хочется поддержки', hint: 'Хочется, чтобы кто-то позаботился и о тебе.' },
-    { id: 'quiet', title: 'Когда трудно выдохнуть', hint: 'Даже наедине с собой мысли не останавливаются.' }
-  ];
+  // One coherent practice. No artificial topic gate without different content.
+  // Curated cards remain the three reviewed illustrations.
 
   // Four core steps: observe -> feel -> connect with life -> find support.
   // Optional deeper steps never replace the closing question.
@@ -31,8 +28,8 @@
     {
       id: 0, title: 'Что ты видишь на карте?',
       body: 'Какие 2–3 детали первыми привлекли твоё внимание?',
-      hint: 'Заметь цвет, предмет, свет или движение. Пока не нужно искать значение.',
-      placeholder: 'Я замечаю…'
+      hint: 'Можно начать словами «Я вижу…» или «Моё внимание привлекает…».',
+      placeholder: 'Я вижу…'
     },
     {
       id: 1, title: 'Какие чувства возникают?',
@@ -42,39 +39,39 @@
     },
     {
       id: 2, title: 'Что это напоминает тебе?',
-      body: 'Есть ли у этого образа связь с твоей жизнью сейчас?',
+      body: 'Есть ли что-то в этом образе, созвучное твоему сегодняшнему дню?',
       hint: 'Вспомни ситуацию, настроение или желание. Связи может и не быть.',
       placeholder: 'Мне вспоминается…'
     },
     {
       id: 3, title: 'Что здесь может поддержать?',
-      body: 'Что в образе помогло бы тебе? Или что хочется добавить?',
-      hint: 'Это может быть свет, пространство, человек или что-то совсем небольшое.',
+      body: 'Какая деталь в нём могла бы стать для тебя поддержкой?',
+      hint: 'Можно назвать цвет, место, действие или ощущение. Не нужно искать ответ любой ценой.',
       placeholder: 'Для меня опорой могло бы стать…'
     },
     {
-      id: 4, title: 'Что замечаешь теперь?',
-      body: 'Посмотри на карту ещё раз. Появилась ли новая деталь?',
-      hint: 'Может, карта выглядит по-прежнему. Это тоже нормально.',
-      placeholder: 'Теперь я вижу…'
+      id: 4, title: 'Что замечаешь при втором взгляде?',
+      body: 'Вернись к карте. Есть ли деталь, которой ты сначала не заметила?',
+      hint: 'Может быть, ничего не изменилось. Не обязательно находить новое.',
+      placeholder: 'Сейчас я замечаю…'
     },
     {
-      id: 5, title: 'Что сделало бы образ легче?',
-      body: 'Представь одно небольшое изменение на картинке.',
-      hint: 'Можно мысленно добавить свет, движение, тепло или пространство.',
-      placeholder: 'Стало бы легче, если бы…'
+      id: 5, title: 'Что хочется сохранить в этом образе?',
+      body: 'Какая часть картинки тебе особенно близка? Что хочется оставить как есть?',
+      hint: 'Это может быть даже один цвет или ощущение.',
+      placeholder: 'Мне хочется сохранить…'
     },
     {
-      id: 6, title: 'Что хочется изменить?',
-      body: 'Если бы ты могла дополнить карту, что бы появилось?',
-      hint: 'Здесь нет правильного рисунка и не нужно ничего объяснять.',
+      id: 6, title: 'Что бы ты немного изменила?',
+      body: 'Если хочется, мысленно добавь, убери или передвинь одну деталь.',
+      hint: 'Можно просто представить больше света, пространства или движения. Изменять необязательно.',
       placeholder: 'Я бы добавила…'
     },
     {
-      id: 7, title: 'Что можно взять в свой день?',
-      body: 'Есть ли в этой картинке что-то, что хочется вспомнить позже?',
-      hint: 'Не обязательно действовать сразу. Достаточно заметить свою мысль.',
-      placeholder: 'Мне хочется сохранить…'
+      id: 7, title: 'Что из этого можно взять в свой день?',
+      body: 'Есть ли что-то маленькое, что хотелось бы попробовать? Можно ничего не делать прямо сейчас.',
+      hint: 'Иногда достаточно помнить об увиденном или дать себе паузу.',
+      placeholder: 'Возможно, мне подойдёт…'
     }
   ];
   const initialSteps = [0, 1, 2, 3];
@@ -83,7 +80,6 @@
   const state = {
     screen: 'intro',
     history: [],
-    topic: null,
     card: null,
     steps: [...initialSteps],
     index: 0,
@@ -150,7 +146,7 @@
   function updateNavigation() {
     const show=state.history.length>0;
     BACK.classList.toggle('hidden',!show);
-    RAIL.classList.toggle('hidden',state.screen==='intro' || state.screen==='intention');
+    RAIL.classList.toggle('hidden',state.screen==='intro');
     let progress=0;
     if(state.screen==='deck') progress=10;
     if(state.screen==='reveal') progress=22;
@@ -188,7 +184,6 @@
     updateNavigation();
     switch(state.screen) {
       case 'intro': renderIntro();break;
-      case 'intention': renderIntention();break;
       case 'deck': renderDeck();break;
       case 'reveal': renderReveal();break;
       case 'question': renderQuestion();break;
@@ -201,7 +196,7 @@
 
   function setHtml(html) {
     ROOT.innerHTML='<div class="scene">'+html+'</div>';
-    window.scrollTo({top:0,behavior:'instant'});
+    window.scrollTo({top:0,behavior:'auto'});
   }
 
   function fan() {
@@ -216,30 +211,20 @@
     setHtml('<div class="intro-scene scene">'+
       '<p class="eyebrow"><span class="dash"></span>ПРАКТИКА С МЕТАФОРИЧЕСКИМИ КАРТАМИ</p>'+
       '<div class="hero-title"><h1>Когда<br>всё <em>на тебе.</em></h1>'+
-      '<p class="lead">Несколько минут, чтобы посмотреть на образ, заметить чувства и найти свою мысль. Без правильных ответов.</p></div>'+
+      '<p class="lead">Выбери одну из трёх карт. Через образ и несколько вопросов можно заметить, что сейчас важно именно тебе.</p></div>'+
       fan()+
       '<div class="intro-bottom"><div class="action-stack">'+act('Начать практику','start','primary','arrow')+
       '</div><span class="small-copy">5–7 минут · В своём темпе · Можно пропускать</span></div>'+
     '</div>');
   }
 
-  function renderIntention() {
-    setHtml('<div class="choice-head"><p class="eyebrow"><span class="dash"></span>НАЧНЁМ С ТЕБЯ</p>'+
-      '<h2>Что сейчас <em>тебе ближе?</em></h2>'+
-      '<p class="lead">Выбери, что ближе сегодня. Дальше будет одна общая практика с теми же картами и вопросами.</p></div>'+
-      '<div class="choice-stack">'+topics.map((t,i)=>'<button class="intention" type="button" data-action="topic" data-value="'+t.id+'">'+
-        '<span class="number">0'+(i+1)+'</span><span class="copy"><strong>'+esc(t.title)+'</strong><small>'+esc(t.hint)+'</small></span><span class="arrow">↗</span></button>').join('')+
-      '</div><p class="quiet-note">Это не тест. Темы помогают настроиться, а не определяют значение карты.</p>');
-  }
-
   function renderDeck() {
-    const current=topics.find(t=>t.id===state.topic);
     setHtml('<div class="selection-scene"><p class="eyebrow"><span class="dash"></span>ШАГ 1 · ОБРАЗ</p>'+
       '<h2>Какая карта <em>тебя зовёт?</em></h2>'+
-      '<p class="lead">Тема «'+esc(current.title)+'». Для любой темы доступны все три карты — выбери ту, что откликается.</p>'+
+      '<p class="lead">Выбери одну из трёх карт, на которой хочется задержать взгляд. Здесь нет правильного выбора.</p>'+
       '<div class="deck" role="group" aria-label="Выбор карты">'+cards.map(c=>'<button type="button" class="deck-card" data-action="card" data-value="'+c.id+'" aria-label="Выбрать карту '+esc(c.title)+'"><img src="'+c.image+'" alt="'+esc(c.title)+'"></button>').join('')+
       '</div><div class="deck-labels">'+cards.map(c=>'<span>'+esc(c.title)+'</span>').join('')+'</div>'+
-      '<p class="hint-line">У карты нет единственного правильного толкования.</p></div>');
+      '<p class="hint-line">Ты сама решаешь, что значат для тебя эти образы.</p></div>');
   }
 
   function renderReveal() {
@@ -247,7 +232,7 @@
       '<p class="eyebrow"><span class="dash"></span>ТВОЯ КАРТА</p>'+
       '<div class="reveal-card"><div class="inner"><img src="'+chosen().image+'" alt="'+esc(chosen().title)+'"></div></div>'+
       '<h2>'+esc(chosen().title)+'</h2>'+
-      '<p class="lead">Не спеши. Присмотрись к деталям. Здесь никто не скажет, что эта карта «значит» — важен только твой взгляд.</p>'+
+      '<p class="lead">Немного побудь с образом. Рассмотри его детали. Здесь нет готового толкования — важны твои собственные ассоциации.</p>'+
       '<div class="action-stack">'+act('Продолжить практику','begin','primary','arrow')+'</div>'+
       '</div>');
   }
@@ -265,10 +250,11 @@
       '<h2>'+esc(q.title)+'</h2><p class="prompt-body">'+esc(q.body)+'</p></div>'+
       '<div class="journal-block"><label class="journal-label" for="reflection">Запиши, если хочется <span>необязательно</span></label>'+
       '<textarea id="reflection" data-note="'+qId+'" maxlength="280" placeholder="'+esc(q.placeholder)+'">'+esc(value)+'</textarea>'+
-      '<p class="journal-note">Записи не передаются боту и исчезают при закрытии или обновлении страницы.</p></div>'+
+      (state.index===0?'<p class="journal-note">Заметки остаются только в памяти этой страницы и не отправляются боту.</p>':'')+'</div>'+
       (state.hintOpen?'<div class="hint-area">'+esc(q.hint)+'</div>':'')+
-      '<div class="question-bottom"><div class="action-stack">'+act(last?'Продолжить':'Дальше','next','primary','arrow')+
-      '<button type="button" class="text-button" data-action="hint">'+(state.hintOpen?'Скрыть подсказку':'Нужна подсказка?')+'</button></div></div></div>');
+      '<div class="question-bottom"><div class="action-stack">'+
+      '<button type="button" class="text-button" data-action="hint">'+(state.hintOpen?'Скрыть подсказку':'Нужна подсказка?')+'</button>'+
+      act(last?'Продолжить':'Дальше','next','primary','arrow')+'</div></div></div>');
   }
 
   function closeCardOverlay() {
@@ -297,7 +283,7 @@
     setHtml('<div class="depth-scene scene">'+
       '<p class="eyebrow"><span class="dash"></span>ОСНОВНАЯ ЧАСТЬ ПРОЙДЕНА</p>'+
       '<h2>Можно <em>завершить.</em><br>А можно — глубже.</h2>'+
-      '<p class="lead">Ты рассмотрела карту, чувства и то, что может поддержать. Можно перейти к итогу или выбрать ещё четыре вопроса (около 3–4 минут).</p>'+
+      '<p class="lead">Ты прошла основные вопросы. Можно перейти к спокойному завершению или ещё 3–4 минуты поисследовать образ — необязательно.</p>'+
       fan()+
       '<div class="action-stack">'+act('Перейти к итогу','finish','primary','arrow')+
       act('Ещё 4 вопроса','deeper','secondary','spark')+'</div>'+
@@ -308,29 +294,30 @@
     setHtml('<div class="closing-scene scene">'+
       '<p class="eyebrow"><span class="dash"></span>ЗАВЕРШЕНИЕ</p>'+
       '<h2>С какой мыслью <em>ты уходишь?</em></h2>'+
-      '<p class="lead">Какая опора или одна небольшая мысль остаётся после встречи с картой? Можно просто подумать об этом.</p>'+
+      '<p class="lead">Прежде чем закончить, посмотри вокруг и почувствуй, где ты сейчас. Что хочется оставить с собой из практики? Если ответа нет — это тоже нормально.</p>'+
       '<div class="closing-card"><img src="'+chosen().image+'" alt="'+esc(chosen().title)+'"></div>'+
-      '<div class="journal-block"><label class="journal-label" for="personal-phrase">Моя мысль <span>необязательно</span></label>'+
+      '<div class="journal-block"><label class="journal-label" for="personal-phrase">Если появилась мысль — запиши <span>необязательно</span></label>'+
       '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я хочу запомнить…">'+esc(state.phrase)+'</textarea>'+
-      '<p class="journal-note">Если не писать, на итоговой карточке будет нейтральная фраза. Текст мы не сохраняем.</p></div>'+
+      '<p class="journal-note">Если ничего не написать, останется просто выбранная карта. Заметки не отправляются.</p></div>'+
       '<div class="action-stack closing-bottom">'+act('Забрать итог практики','complete','primary','arrow')+'</div>'+
       '</div>');
   }
 
   function renderResult() {
-    const label=state.phrase.trim() || 'Я могу быть к себе бережнее.';
+    const hasThought=Boolean(state.phrase.trim());
+    const label=hasThought ? state.phrase.trim() : chosen().title;
     setHtml('<div class="result-scene scene"><p class="eyebrow"><span class="dash"></span>ИТОГ ПРАКТИКИ</p>'+
-      '<h2>Твоя мысль <em>остаётся с тобой.</em></h2>'+
-      '<p class="lead" style="margin:0 0 18px">Это личная карточка с твоей мыслью. Её можно сохранить на телефон или просто завершить практику.</p>'+
+      '<h2>Возьми с собой <em>свою карту.</em></h2>'+
+      '<p class="lead" style="margin:0 0 18px">'+(hasThought?'На карточке — твоя фраза. Можно сохранить её на телефон.':'Ты не обязана придумывать итог. Можно сохранить только выбранный образ.')+'</p>'+
       '<div class="personal-card"><img src="'+chosen().wallpaper+'" alt="Карта для телефона">'+
-      '<div class="overlay"><small>МОЯ МЫСЛЬ</small><strong id="live-phrase">'+esc(label)+'</strong></div></div>'+
+      '<div class="overlay"><small id="live-caption">'+(hasThought?'МОЯ МЫСЛЬ':'МОЯ КАРТА')+'</small><strong id="live-phrase">'+esc(label)+'</strong></div></div>'+
       '<p class="result-gift-label">Твоя карточка для телефона · Катя о душевном</p>'+
-      '<div class="result-input"><label for="personal-phrase">Если хочешь, измени фразу</label>'+
+      '<div class="result-input"><label for="personal-phrase">'+(hasThought?'Изменить свою фразу':'Если хочешь, добавь свою мысль')+'</label>'+
       '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я хочу запомнить…">'+esc(state.phrase)+'</textarea>'+
-      '<small>Мы не сохраняем ответы и не отправляем их боту. Они исчезнут при закрытии страницы.</small></div>'+
+      '<small>Текст остаётся в этой вкладке до её закрытия или обновления; боту не передаётся.</small></div>'+
       '<div class="action-stack">'+act('Сохранить итог','download','primary','download')+
       act('Посмотреть изображение','preview-image','secondary','eye')+
-      '<p class="save-explanation">На iPhone: «Поделиться» → «Сохранить изображение».</p>'+
+      '<p class="save-explanation">На телефоне откроется меню сохранения. Если его нет, выбери «Посмотреть изображение».</p>'+
       '<p class="result-signoff">С теплом, Катя о душевном 🌿</p></div>'+
       '</div>');
     scheduleCardRender();
@@ -340,7 +327,8 @@
     if (state.imageBlob) return state.imageBlob;
     const revision=cardRevision;
     const asset=chosen().wallpaper;
-    const phrase=(state.phrase.trim()||'Я могу быть к себе бережнее.').slice(0,110);
+    const hasThought=Boolean(state.phrase.trim());
+    const phrase=(hasThought?state.phrase.trim():chosen().title).slice(0,110);
     const image=new Image();
     image.decoding='async';
     image.src=asset;
@@ -362,9 +350,16 @@
     ctx.textBaseline='middle';
     ctx.fillStyle='#f5efdf';
     ctx.font='700 24px Manrope, Arial, sans-serif';
-    ctx.fillText('М О Я   М Ы С Л Ь',540,y+78);
+    ctx.fillText(hasThought?'М О Я   М Ы С Л Ь':'М О Я   К А Р Т А',540,y+78);
     ctx.font='500 64px Georgia, serif';
     lines.forEach((line,i)=>ctx.fillText(line,540,y+188+(i-(lines.length-1)/2)*87));
+    // Attribution belongs to the downloaded image, not just the web page.
+    ctx.fillStyle='rgba(31,38,31,.72)';
+    roundRect(ctx,310,1770,460,70,26);
+    ctx.fill();
+    ctx.fillStyle='#fffaf0';
+    ctx.font='500 31px Georgia, serif';
+    ctx.fillText('Катя о душевном',540,1806);
     const blob=await new Promise((res,rej)=>canvas.toBlob(x=>x?res(x):rej(new Error('Canvas export failed')),'image/jpeg',.94));
     if(revision!==cardRevision)return generateCard(); // The phrase changed during canvas export.
     if(state.imageBlob)return state.imageBlob;
@@ -436,7 +431,7 @@
 
   function showSavePreview() {
     if(!state.imageUrl) {
-      showToast('Не удалось открыть открытку. Попробуй ещё раз.');
+      showToast('Не удалось открыть изображение. Попробуй ещё раз.');
       return;
     }
     if(document.getElementById('save-image-overlay'))return;
@@ -531,18 +526,13 @@
     if(state.imageBlob){showSavePreview();return;}
     generateCard().then(showSavePreview).catch(error=>{
       console.error('Image preview failed',error);
-      showToast('Не удалось открыть открытку. Попробуй ещё раз.');
+      showToast('Не удалось открыть изображение. Попробуй ещё раз.');
     });
   }
 
   function handle(action,value) {
     haptic();
-    if(action==='start'){go('intention');return;}
-    if(action==='topic'){
-      if(!topics.some(x=>x.id===value))return;
-      state.topic=value;state.card=null;state.steps=[...initialSteps];state.index=0;
-      state.notes={};state.phrase='';invalidateImage();go('deck');return;
-    }
+    if(action==='start'){go('deck');return;}
     if(action==='card'){
       const card=Number(value);
       if(!cards.some(x=>x.id===card))return;
@@ -578,7 +568,9 @@
     state.phrase=el.value.slice(0,110);
     invalidateImage();
     const text=document.getElementById('live-phrase');
-    if(text)text.textContent=state.phrase.trim()||'Я могу быть к себе бережнее.'
+    if(text)text.textContent=state.phrase.trim()||chosen().title;
+    const label=document.getElementById('live-caption');
+    if(label)label.textContent=state.phrase.trim()?'МОЯ МЫСЛЬ':'МОЯ КАРТА';
     scheduleCardRender();
   }
 
@@ -626,9 +618,9 @@
 
   window.__KATYA_DEMO__={
     version:APP_VERSION,
-    state:()=>({screen:state.screen,topic:state.topic,card:state.card,steps:[...state.steps],index:state.index,
+    state:()=>({screen:state.screen,card:state.card,steps:[...state.steps],index:state.index,
                 noteCount:Object.values(state.notes).filter(x=>x.trim()).length,imageReady:!!state.imageBlob}),
-    reset:()=>{state.screen='intro';state.history=[];state.topic=null;state.card=null;state.steps=[...initialSteps];state.index=0;state.notes={};state.phrase='';invalidateImage();closeCardOverlay();render();}
+    reset:()=>{state.screen='intro';state.history=[];state.card=null;state.steps=[...initialSteps];state.index=0;state.notes={};state.phrase='';invalidateImage();closeCardOverlay();render();}
   };
   render();
 })();
