@@ -4,7 +4,7 @@
 'use strict';
 
 (function () {
-  const APP_VERSION = '2.0.3';
+  const APP_VERSION = '2.1.0';
   const ROOT = document.getElementById('app');
   const BACK = document.getElementById('top-back');
   const RAIL = document.getElementById('progress-rail');
@@ -25,54 +25,60 @@
     { id: 'quiet', title: 'Когда трудно выдохнуть', hint: 'Даже наедине с собой мысли не останавливаются.' }
   ];
 
-  // The 7 approved questions from the brief, slightly shortened for mobile screens.
+  // Four core steps: observe -> feel -> connect with life -> find support.
+  // Optional deeper steps never replace the closing question.
   const questions = [
     {
       id: 0, title: 'Что ты видишь на карте?',
-      body: 'Назови для себя 2–3 детали. Пока не нужно искать в них какой-то смысл.',
-      hint: 'На какой детали взгляд задержался дольше? Это может быть цвет, предмет или свет.',
-      placeholder: 'Например: тёплый свет, окно, чашка…'
-    },
-    {
-      id: 1, title: 'Какие чувства откликаются?',
-      body: 'Посмотри на одну из деталей. Если хочется — попробуй назвать своё ощущение одним словом.',
-      hint: 'Спокойнее, тревожнее, любопытно? Может, ничего особенного. Это тоже нормально.',
+      body: 'Какие 2–3 детали первыми привлекли твоё внимание?',
+      hint: 'Заметь цвет, предмет, свет или движение. Пока не нужно искать значение.',
       placeholder: 'Я замечаю…'
     },
     {
-      id: 2, title: 'Что тебе вспомнилось?',
-      body: 'Один момент из последних дней. Где ты была, что происходило?',
-      hint: 'Если картинка ничего не напоминает, вспомни обычный момент, когда ты заметила усталость.',
-      placeholder: 'Я вспомнила…'
+      id: 1, title: 'Какие чувства возникают?',
+      body: 'Посмотри на выбранные детали. Что ты чувствуешь?',
+      hint: 'Можно назвать всего одно чувство. А можно ничего не записывать.',
+      placeholder: 'Когда я смотрю, мне…'
     },
     {
-      id: 3, title: 'Что забрало больше всего сил?',
-      body: 'Попробуй назвать одну вещь, не всё сразу. Даже небольшой ответ подойдёт.',
-      hint: 'Это могло быть само дело, необходимость всё помнить, принимать решения или следить за другими.',
-      placeholder: 'Больше всего сил ушло на…'
+      id: 2, title: 'Что это напоминает тебе?',
+      body: 'Есть ли у этого образа связь с твоей жизнью сейчас?',
+      hint: 'Вспомни ситуацию, настроение или желание. Связи может и не быть.',
+      placeholder: 'Мне вспоминается…'
     },
     {
-      id: 4, title: 'Что сделало бы момент легче?',
-      body: 'Представь одну конкретную вещь, которая могла бы измениться.',
-      hint: 'Если бы можно было снять с себя одну часть нагрузки — какую?',
-      placeholder: 'Было бы легче, если бы…'
+      id: 3, title: 'Что здесь может поддержать?',
+      body: 'Что в образе помогло бы тебе? Или что хочется добавить?',
+      hint: 'Это может быть свет, пространство, человек или что-то совсем небольшое.',
+      placeholder: 'Для меня опорой могло бы стать…'
     },
     {
-      id: 5, title: 'Что бы ты изменила в картине?',
-      body: 'Вернись к выбранному образу. Что хочется добавить, убрать или передвинуть?',
-      hint: 'Пусть это будет маленькая перемена. Может, такая же поддержка нужна тебе и в жизни?',
+      id: 4, title: 'Что замечаешь теперь?',
+      body: 'Посмотри на карту ещё раз. Появилась ли новая деталь?',
+      hint: 'Может, карта выглядит по-прежнему. Это тоже нормально.',
+      placeholder: 'Теперь я вижу…'
+    },
+    {
+      id: 5, title: 'Что сделало бы образ легче?',
+      body: 'Представь одно небольшое изменение на картинке.',
+      hint: 'Можно мысленно добавить свет, движение, тепло или пространство.',
+      placeholder: 'Стало бы легче, если бы…'
+    },
+    {
+      id: 6, title: 'Что хочется изменить?',
+      body: 'Если бы ты могла дополнить карту, что бы появилось?',
+      hint: 'Здесь нет правильного рисунка и не нужно ничего объяснять.',
       placeholder: 'Я бы добавила…'
     },
     {
-      id: 6, title: 'Какой маленький шаг возможен?',
-      body: 'Что из этого ты можешь попробовать сегодня — в самой небольшой форме?',
-      hint: 'Можно отложить телефон на минуту, попросить о помощи или просто дать себе паузу.',
-      placeholder: 'Я попробую…'
+      id: 7, title: 'Что можно взять в свой день?',
+      body: 'Есть ли в этой картинке что-то, что хочется вспомнить позже?',
+      hint: 'Не обязательно действовать сразу. Достаточно заметить свою мысль.',
+      placeholder: 'Мне хочется сохранить…'
     }
   ];
-
-  const initialSteps = [0, 3, 6];
-  const deeperSteps = [1, 2, 4, 5];
+  const initialSteps = [0, 1, 2, 3];
+  const deeperSteps = [4, 5, 6, 7];
 
   const state = {
     screen: 'intro',
@@ -149,8 +155,8 @@
     if(state.screen==='deck') progress=10;
     if(state.screen==='reveal') progress=22;
     if(state.screen==='question') progress=27 + 52*(state.index+1)/state.steps.length;
-    if(state.screen==='view-card') progress=27 + 52*(state.index+1)/state.steps.length;
-    if(state.screen==='depth') progress=78;
+    if(state.screen==='closing') progress=94;
+    if(state.screen==='depth') progress=80;
     if(state.screen==='result') progress=100;
     BAR.style.width=progress+'%';
     try {
@@ -167,6 +173,7 @@
 
   function back() {
     if(document.getElementById('save-image-overlay')){closeSavePreview();return;}
+    if(document.getElementById('card-zoom-overlay')){closeCardOverlay();return;}
     if(!state.history.length)return;
     const last=state.history.pop();
     state.screen=last.screen;
@@ -185,7 +192,7 @@
       case 'deck': renderDeck();break;
       case 'reveal': renderReveal();break;
       case 'question': renderQuestion();break;
-      case 'view-card': renderCardPreview();break;
+      case 'closing': renderClosing();break;
       case 'depth': renderDepth();break;
       case 'result': renderResult();break;
       default: renderIntro();
@@ -209,30 +216,30 @@
     setHtml('<div class="intro-scene scene">'+
       '<p class="eyebrow"><span class="dash"></span>ПРАКТИКА С МЕТАФОРИЧЕСКИМИ КАРТАМИ</p>'+
       '<div class="hero-title"><h1>Когда<br>всё <em>на тебе.</em></h1>'+
-      '<p class="lead">Маленькая пауза среди большого дня. Три образа, несколько бережных вопросов — и одна мысль, которую можно забрать с собой.</p></div>'+
+      '<p class="lead">Несколько минут, чтобы посмотреть на образ, заметить чувства и найти свою мысль. Без правильных ответов.</p></div>'+
       fan()+
-      '<div class="intro-bottom"><div class="action-stack">'+act('Побыть немного с собой','start','primary','arrow')+
-      '</div><span class="small-copy">5–10 минут · В своём темпе · Можно пропускать</span></div>'+
+      '<div class="intro-bottom"><div class="action-stack">'+act('Начать практику','start','primary','arrow')+
+      '</div><span class="small-copy">5–7 минут · В своём темпе · Можно пропускать</span></div>'+
     '</div>');
   }
 
   function renderIntention() {
     setHtml('<div class="choice-head"><p class="eyebrow"><span class="dash"></span>НАЧНЁМ С ТЕБЯ</p>'+
       '<h2>Что сейчас <em>тебе ближе?</em></h2>'+
-      '<p class="lead">Ничего не нужно объяснять. Просто выбери мысль, которая откликается сегодня.</p></div>'+
+      '<p class="lead">Выбери, что ближе сегодня. Дальше будет одна общая практика с теми же картами и вопросами.</p></div>'+
       '<div class="choice-stack">'+topics.map((t,i)=>'<button class="intention" type="button" data-action="topic" data-value="'+t.id+'">'+
         '<span class="number">0'+(i+1)+'</span><span class="copy"><strong>'+esc(t.title)+'</strong><small>'+esc(t.hint)+'</small></span><span class="arrow">↗</span></button>').join('')+
-      '</div><p class="quiet-note">Это не тест и не оценка состояния. Здесь нет неправильного выбора.</p>');
+      '</div><p class="quiet-note">Это не тест. Темы помогают настроиться, а не определяют значение карты.</p>');
   }
 
   function renderDeck() {
     const current=topics.find(t=>t.id===state.topic);
     setHtml('<div class="selection-scene"><p class="eyebrow"><span class="dash"></span>ШАГ 1 · ОБРАЗ</p>'+
       '<h2>Какая карта <em>тебя зовёт?</em></h2>'+
-      '<p class="lead">Не нужно угадывать значение. Поймай взглядом ту картинку, на которой хочется задержаться.</p>'+
+      '<p class="lead">Тема «'+esc(current.title)+'». Для любой темы доступны все три карты — выбери ту, что откликается.</p>'+
       '<div class="deck" role="group" aria-label="Выбор карты">'+cards.map(c=>'<button type="button" class="deck-card" data-action="card" data-value="'+c.id+'" aria-label="Выбрать карту '+esc(c.title)+'"><img src="'+c.image+'" alt="'+esc(c.title)+'"></button>').join('')+
       '</div><div class="deck-labels">'+cards.map(c=>'<span>'+esc(c.title)+'</span>').join('')+'</div>'+
-      '<p class="hint-line">Выбери интуитивно — у каждой карты свой образ, а смысл будет твоим.</p></div>');
+      '<p class="hint-line">У карты нет единственного правильного толкования.</p></div>');
   }
 
   function renderReveal() {
@@ -251,51 +258,79 @@
     const last=state.index===state.steps.length-1;
     const value=state.notes[qId]||'';
     setHtml('<div class="practice-scene scene">'+
-      '<div class="practice-meta"><span class="eyebrow" style="margin:0"><span class="dash"></span>НАЕДИНЕ С СОБОЙ</span><span class="badge">'+(state.index+1)+' / '+state.steps.length+'</span></div>'+
-      '<div><img class="practice-card-preview" src="'+chosen().image+'" alt="Твоя карта '+esc(chosen().title)+'">'+
+      '<div class="practice-meta"><span class="eyebrow" style="margin:0"><span class="dash"></span>ПРАКТИКА С КАРТОЙ</span><span class="badge">'+(state.index+1)+' / '+state.steps.length+'</span></div>'+
+      '<div class="prompt-head">'+
+      '<button type="button" class="card-zoom" data-action="view-card" aria-label="Увеличить выбранную карту">'+
+      '<img src="'+chosen().image+'" alt="'+esc(chosen().title)+'"><span aria-hidden="true" class="card-zoom-symbol">⤢</span></button>'+
       '<h2>'+esc(q.title)+'</h2><p class="prompt-body">'+esc(q.body)+'</p></div>'+
-      '<div class="journal-block"><label class="journal-label" for="reflection"><span>Если хочется — запиши мысль</span><span>необязательно</span></label>'+
+      '<div class="journal-block"><label class="journal-label" for="reflection">Запиши, если хочется <span>необязательно</span></label>'+
       '<textarea id="reflection" data-note="'+qId+'" maxlength="280" placeholder="'+esc(q.placeholder)+'">'+esc(value)+'</textarea>'+
-      '<div class="journal-note">Эти слова остаются только на экране. Мы их никуда не отправляем.</div></div>'+
+      '<p class="journal-note">Записи не передаются боту и исчезают при закрытии или обновлении страницы.</p></div>'+
       (state.hintOpen?'<div class="hint-area">'+esc(q.hint)+'</div>':'')+
-      '<div class="question-bottom"><div class="action-stack">'+act(last?'Продолжить':'Следующий вопрос','next','primary','arrow')+
-      '<button type="button" class="text-button" data-action="hint">'+(state.hintOpen?'Скрыть подсказку':'Нужна маленькая подсказка?')+'</button>'+
-      '<button type="button" class="text-button" data-action="view-card">Посмотреть карту ещё раз</button></div></div></div>');
+      '<div class="question-bottom"><div class="action-stack">'+act(last?'Продолжить':'Дальше','next','primary','arrow')+
+      '<button type="button" class="text-button" data-action="hint">'+(state.hintOpen?'Скрыть подсказку':'Нужна подсказка?')+'</button></div></div></div>');
   }
 
-  function renderCardPreview() {
-    setHtml('<div class="image-view scene"><p class="eyebrow"><span class="dash"></span>ПОСМОТРИ ЕЩЁ РАЗ</p>'+
-      '<h2>'+esc(chosen().title)+'</h2>'+
-      '<img src="'+chosen().image+'" class="under-image" alt="'+esc(chosen().title)+'">'+
-      '<p class="lead">Может, сейчас ты замечаешь что-то другое. А может, всё то же самое. И так, и так можно.</p>'+
-      '<div class="action-stack">'+act('Вернуться к вопросу','back','primary','arrow')+'</div></div>');
+  function closeCardOverlay() {
+    const overlay=document.getElementById('card-zoom-overlay');
+    if(overlay)overlay.remove();
+    const trigger=ROOT.querySelector('[data-action="view-card"]');
+    if(trigger)trigger.focus({preventScroll:true});
+  }
+
+  function showCardOverlay() {
+    if(document.getElementById('card-zoom-overlay'))return;
+    const overlay=document.createElement('div');
+    overlay.className='card-zoom-overlay';
+    overlay.id='card-zoom-overlay';
+    overlay.innerHTML='<section class="card-zoom-dialog" role="dialog" aria-modal="true" aria-label="Рассмотреть карту">'+
+      '<button type="button" class="card-zoom-close" aria-label="Закрыть увеличенную карту">×</button>'+
+      '<img src="'+chosen().image+'" alt="'+esc(chosen().title)+'"><p>'+esc(chosen().title)+'</p></section>';
+    overlay.addEventListener('click',event=>{
+      if(event.target===overlay || event.target.closest('.card-zoom-close'))closeCardOverlay();
+    });
+    document.body.appendChild(overlay);
+    overlay.querySelector('.card-zoom-close').focus({preventScroll:true});
   }
 
   function renderDepth() {
     setHtml('<div class="depth-scene scene">'+
-      '<p class="eyebrow"><span class="dash"></span>ТЫ УЖЕ СДЕЛАЛА ПАУЗУ</p>'+
-      '<h2>Можно здесь <em>остановиться.</em><br>А можно — глубже.</h2>'+
-      '<p class="lead">Ты прошла три вопроса. Если хочется, впереди ещё четыре — чтобы немного внимательнее присмотреться к себе.</p>'+
+      '<p class="eyebrow"><span class="dash"></span>ОСНОВНАЯ ЧАСТЬ ПРОЙДЕНА</p>'+
+      '<h2>Можно <em>завершить.</em><br>А можно — глубже.</h2>'+
+      '<p class="lead">Ты рассмотрела карту, чувства и то, что может поддержать. Можно перейти к итогу или выбрать ещё четыре вопроса (около 3–4 минут).</p>'+
       fan()+
-      '<div class="action-stack">'+act('Хочу ещё четыре вопроса','deeper','primary','arrow')+
-      act('Забрать свою открытку','finish','secondary','spark')+'</div>'+
-      '<p class="quiet-note">Любой вариант — хороший. Ты ничего не должна этой практике.</p></div>');
+      '<div class="action-stack">'+act('Перейти к итогу','finish','primary','arrow')+
+      act('Ещё 4 вопроса','deeper','secondary','spark')+'</div>'+
+      '<p class="quiet-note">В обоих случаях будет короткое завершение.</p></div>');
+  }
+
+  function renderClosing() {
+    setHtml('<div class="closing-scene scene">'+
+      '<p class="eyebrow"><span class="dash"></span>ЗАВЕРШЕНИЕ</p>'+
+      '<h2>С какой мыслью <em>ты уходишь?</em></h2>'+
+      '<p class="lead">Какая опора или одна небольшая мысль остаётся после встречи с картой? Можно просто подумать об этом.</p>'+
+      '<div class="closing-card"><img src="'+chosen().image+'" alt="'+esc(chosen().title)+'"></div>'+
+      '<div class="journal-block"><label class="journal-label" for="personal-phrase">Моя мысль <span>необязательно</span></label>'+
+      '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я хочу запомнить…">'+esc(state.phrase)+'</textarea>'+
+      '<p class="journal-note">Если не писать, на итоговой карточке будет нейтральная фраза. Текст мы не сохраняем.</p></div>'+
+      '<div class="action-stack closing-bottom">'+act('Забрать итог практики','complete','primary','arrow')+'</div>'+
+      '</div>');
   }
 
   function renderResult() {
-    const label=state.phrase.trim() || 'Сегодня я могу опереться на…';
-    setHtml('<div class="result-scene scene"><p class="eyebrow"><span class="dash"></span>ТВОЯ ОПОРА</p>'+
-      '<h2>Что хочется <em>забрать с собой?</em></h2>'+
-      '<p class="lead" style="margin:0 0 18px">Одна фраза, которая будет напоминать тебе о самом важном. Напиши свою — или оставь начало мысли.</p>'+
+    const label=state.phrase.trim() || 'Я могу быть к себе бережнее.';
+    setHtml('<div class="result-scene scene"><p class="eyebrow"><span class="dash"></span>ИТОГ ПРАКТИКИ</p>'+
+      '<h2>Твоя мысль <em>остаётся с тобой.</em></h2>'+
+      '<p class="lead" style="margin:0 0 18px">Это личная карточка с твоей мыслью. Её можно сохранить на телефон или просто завершить практику.</p>'+
       '<div class="personal-card"><img src="'+chosen().wallpaper+'" alt="Карта для телефона">'+
-      '<div class="overlay"><small>МОЯ ОПОРА</small><strong id="live-phrase">'+esc(label)+'</strong></div></div>'+
-      '<p class="result-gift-label">Твоя карта для экрана телефона · Катя о душевном</p>'+
-      '<div class="result-input"><label for="personal-phrase">Моя фраза на сегодня</label>'+
-      '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я могу опереться на…">'+esc(state.phrase)+'</textarea>'+
-      '<small>Только ты видишь эту фразу. Она не отправляется ни Кате, ни боту.</small></div>'+
-      '<div class="action-stack">'+act('Сохранить в «Фото»','download','primary','download')+
-      act('Посмотреть открытку крупно','preview-image','secondary','eye')+
-      '<p class="save-explanation">На iPhone выбери «Сохранить изображение» в меню «Поделиться».</p>'+
+      '<div class="overlay"><small>МОЯ МЫСЛЬ</small><strong id="live-phrase">'+esc(label)+'</strong></div></div>'+
+      '<p class="result-gift-label">Твоя карточка для телефона · Катя о душевном</p>'+
+      '<div class="result-input"><label for="personal-phrase">Если хочешь, измени фразу</label>'+
+      '<textarea maxlength="110" id="personal-phrase" rows="2" placeholder="Сегодня я хочу запомнить…">'+esc(state.phrase)+'</textarea>'+
+      '<small>Мы не сохраняем ответы и не отправляем их боту. Они исчезнут при закрытии страницы.</small></div>'+
+      '<div class="action-stack">'+act('Сохранить итог','download','primary','download')+
+      act('Посмотреть изображение','preview-image','secondary','eye')+
+      '<p class="save-explanation">На iPhone: «Поделиться» → «Сохранить изображение».</p>'+
       '<p class="result-signoff">С теплом, Катя о душевном 🌿</p></div>'+
       '</div>');
     scheduleCardRender();
@@ -305,7 +340,7 @@
     if (state.imageBlob) return state.imageBlob;
     const revision=cardRevision;
     const asset=chosen().wallpaper;
-    const phrase=(state.phrase.trim()||'Сегодня я могу опереться на…').slice(0,110);
+    const phrase=(state.phrase.trim()||'Я могу быть к себе бережнее.').slice(0,110);
     const image=new Image();
     image.decoding='async';
     image.src=asset;
@@ -327,7 +362,7 @@
     ctx.textBaseline='middle';
     ctx.fillStyle='#f5efdf';
     ctx.font='700 24px Manrope, Arial, sans-serif';
-    ctx.fillText('М О Я   О П О Р А',540,y+78);
+    ctx.fillText('М О Я   М Ы С Л Ь',540,y+78);
     ctx.font='500 64px Georgia, serif';
     lines.forEach((line,i)=>ctx.fillText(line,540,y+188+(i-(lines.length-1)/2)*87));
     const blob=await new Promise((res,rej)=>canvas.toBlob(x=>x?res(x):rej(new Error('Canvas export failed')),'image/jpeg',.94));
@@ -411,7 +446,7 @@
     overlay.innerHTML=
       '<section class="save-image-dialog" role="dialog" aria-modal="true" aria-labelledby="save-image-title">'+
       '<button type="button" class="save-image-close" data-save-action="close" aria-label="Закрыть">×</button>'+
-      '<p class="eyebrow">ТВОЯ ГОТОВАЯ КАРТА</p>'+
+      '<p class="eyebrow">ТВОЯ ЛИЧНАЯ КАРТОЧКА</p>'+
       '<h2 id="save-image-title">Сохрани её <em>в «Фото».</em></h2>'+
       '<p class="save-image-guide">Нажми и удерживай изображение → «Сохранить изображение». '+
       'Если такого пункта нет, нажми «Поделиться» и в системном меню выбери «Сохранить изображение».</p>'+
@@ -420,8 +455,8 @@
       '<button type="button" class="primary" data-save-action="system">Поделиться с телефоном</button>'+
       '<button type="button" class="secondary" data-save-action="file">Скачать JPG-файл</button>'+
       '<button type="button" class="text-button" data-save-action="close">Вернуться к практике</button>'+
-      '</div><p class="save-image-note">Карта создаётся только на твоём устройстве. '+
-      'Твоя личная фраза никуда не отправляется.</p></section>';
+      '</div><p class="save-image-note">Изображение создаётся в браузере. '+
+      'Мы не получаем и не сохраняем твою фразу.</p></section>';
     overlay.addEventListener('click',event=>{
       if(event.target===overlay){closeSavePreview();return;}
       const btn=event.target.closest('[data-save-action]');
@@ -502,45 +537,48 @@
 
   function handle(action,value) {
     haptic();
-    if(action==='start'){go('intention');return}
+    if(action==='start'){go('intention');return;}
     if(action==='topic'){
       if(!topics.some(x=>x.id===value))return;
-      state.topic=value;go('deck');return;
+      state.topic=value;state.card=null;state.steps=[...initialSteps];state.index=0;
+      state.notes={};state.phrase='';invalidateImage();go('deck');return;
     }
     if(action==='card'){
       const card=Number(value);
       if(!cards.some(x=>x.id===card))return;
+      if(state.card!==card){state.notes={};state.phrase='';invalidateImage();}
       state.card=card;go('reveal');return;
     }
-    if(action==='begin'){state.index=0;go('question');return}
-    if(action==='hint'){state.hintOpen=!state.hintOpen;renderQuestion();return}
-    if(action==='view-card'){go('view-card');return}
-    if(action==='back'){back();return}
+    if(action==='begin'){state.index=0;go('question');return;}
+    if(action==='hint'){state.hintOpen=!state.hintOpen;renderQuestion();return;}
+    if(action==='view-card'){showCardOverlay();return;}
+    if(action==='back'){back();return;}
     if(action==='next'){
-      if(state.index<state.steps.length-1) {
+      if(state.index<state.steps.length-1){
         state.history.push({screen:'question',index:state.index,steps:[...state.steps]});
         state.index++;state.hintOpen=false;render();
-      } else if(state.steps.length===3){go('depth')}
-      else go('result');
+      }else if(state.steps.length===initialSteps.length)go('depth');
+      else go('closing');
       return;
     }
     if(action==='deeper'){
       state.steps=[...initialSteps,...deeperSteps];
-      state.index=3;
+      state.index=initialSteps.length;
       go('question');
       return;
     }
-    if(action==='finish'){go('result');return}
-    if(action==='download'){downloadCard();return}
-    if(action==='share'){shareCard();return}
-    if(action==='preview-image'){previewCard();return}
+    if(action==='finish'){go('closing');return;}
+    if(action==='complete'){go('result');return;}
+    if(action==='download'){downloadCard();return;}
+    if(action==='share'){shareCard();return;}
+    if(action==='preview-image'){previewCard();return;}
   }
 
   function updatePhrase(el) {
     state.phrase=el.value.slice(0,110);
     invalidateImage();
     const text=document.getElementById('live-phrase');
-    if(text)text.textContent=state.phrase.trim()||'Сегодня я могу опереться на…';
+    if(text)text.textContent=state.phrase.trim()||'Я могу быть к себе бережнее.'
     scheduleCardRender();
   }
 
@@ -564,7 +602,8 @@
     if(e.key==='Escape'){
       if(document.getElementById('save-image-overlay')){
         e.preventDefault();closeSavePreview();
-      }else if(state.history.length){e.preventDefault();back();}
+      }else if(document.getElementById('card-zoom-overlay')){e.preventDefault();closeCardOverlay();}
+      else if(state.history.length){e.preventDefault();back();}
     }
   });
   function initializeTelegram() {
@@ -589,7 +628,7 @@
     version:APP_VERSION,
     state:()=>({screen:state.screen,topic:state.topic,card:state.card,steps:[...state.steps],index:state.index,
                 noteCount:Object.values(state.notes).filter(x=>x.trim()).length,imageReady:!!state.imageBlob}),
-    reset:()=>{state.screen='intro';state.history=[];state.topic=null;state.card=null;state.steps=[...initialSteps];state.index=0;state.notes={};state.phrase='';invalidateImage();render();}
+    reset:()=>{state.screen='intro';state.history=[];state.topic=null;state.card=null;state.steps=[...initialSteps];state.index=0;state.notes={};state.phrase='';invalidateImage();closeCardOverlay();render();}
   };
   render();
 })();

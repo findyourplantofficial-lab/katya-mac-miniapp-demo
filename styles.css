@@ -169,3 +169,30 @@ textarea:focus-visible {outline:none}
 @media (max-width:370px) { .app-shell{padding-left:17px;padding-right:17px}.topbar{min-height:76px}h1{font-size:53px}.intro-art{height:205px}.deck{gap:6px}.practice-scene h2{font-size:42px}.slow-label{display:none}.footer{font-size:9px;gap:8px} }
 @media (max-height:710px) { .topbar{min-height:69px}.intro-scene{padding-top:5px}.intro-art{min-height:170px;height:190px;margin:6px auto}.intro-scene h1{font-size:58px}.lead{line-height:1.65}.choice-head{padding-top:10px}.choice-stack{gap:8px;margin:10px 0}.intention{min-height:83px;padding:10px}.deck{margin-top:17px}.reveal-card{width:min(50vw,220px)}.practice-scene{padding-top:4px}.practice-scene h2{font-size:46px}.journal-block{margin-top:9px;padding:11px}textarea{min-height:79px}.footer{min-height:43px} }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after {animation:none!important;transition:none!important;scroll-behavior:auto!important} }
+
+/* Katya 15.11 feedback: readable questions, tappable zoom, calm closing. */
+.practice-scene h2 {font-size:clamp(38px,9.8vw,53px);line-height:1.05;margin-bottom:13px}
+.prompt-head{min-height:140px}
+.prompt-body{min-height:0;margin:0;font-size:14px;line-height:1.65}
+.practice-scene .journal-block,.closing-scene .journal-block{margin-top:18px;padding:15px 16px 11px}
+.practice-scene textarea,.closing-scene textarea{min-height:83px}
+.journal-note{font-size:11px;line-height:1.55;margin:8px 0 0}
+.practice-scene .question-bottom .action-stack{gap:5px}
+.card-zoom {position:relative;float:right;display:block;width:86px;height:118px;padding:0;border:3px solid #fff;border-radius:10px;overflow:hidden;box-shadow:0 6px 20px rgba(55,54,39,.14);background:#ddd4c4;cursor:zoom-in;margin:-3px 0 10px 14px}
+.card-zoom img{display:block;width:100%;height:100%;object-fit:cover}
+.card-zoom-symbol{position:absolute;bottom:4px;right:5px;display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:rgba(253,251,246,.95);color:#434f3d;font:700 16px var(--sans)}
+.card-zoom-overlay{position:fixed;inset:0;z-index:11000;padding:max(56px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center;background:rgba(25,31,23,.88);overscroll-behavior:contain}
+.card-zoom-dialog{position:relative;width:min(100%,410px);max-height:100%;text-align:center}
+.card-zoom-dialog img{display:block;margin:0 auto;width:auto;max-width:100%;max-height:calc(100dvh - 164px);height:auto;object-fit:contain;border:5px solid #fffdf8;border-radius:13px;box-shadow:0 17px 60px rgba(0,0,0,.25)}
+.card-zoom-dialog p{font:500 15px var(--serif);font-size:22px;color:#fffdf8;margin:12px 0 0}
+.card-zoom-close{position:absolute;right:-5px;top:-49px;width:44px;height:44px;border-radius:50%;background:#fffdf8;color:#34352d;border:0;font-size:31px;line-height:1}
+.depth-scene h2{font-size:clamp(42px,10.5vw,55px)}
+.depth-scene .intro-art{min-height:150px;height:173px}
+.closing-scene{padding-top:24px}
+.closing-scene h2{font-size:clamp(45px,11.2vw,60px)}
+.closing-scene .lead{line-height:1.72}
+.closing-card{width:112px;height:148px;margin:8px auto 4px;border:4px solid white;border-radius:10px;box-shadow:0 8px 28px rgba(69,58,41,.16);overflow:hidden}
+.closing-card img{display:block;width:100%;height:100%;object-fit:cover}
+.closing-bottom{margin-top:auto;padding:20px 0 8px}
+@media(max-height:710px){.closing-scene{padding-top:7px}.closing-card{width:91px;height:121px}.closing-scene .lead{line-height:1.5}.card-zoom{width:70px;height:96px}.practice-scene .journal-block{margin-top:10px}}
+@media(max-width:370px){.practice-scene h2{font-size:37px}.card-zoom{width:73px;height:101px}.card-zoom-dialog img{max-height:calc(100dvh - 140px)}}
